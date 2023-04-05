@@ -10,31 +10,12 @@ const ColorPickerWrapper = styled.div`
   margin: 0 16px;
 `;
 
-const ColorPickerInput = styled.input`
+const ColorPickerInput = styled.input<{ bgColor: string }>`
   appearance: none;
-  width: 36px;
-  height: 36px;
-  border: 2px solid #ffffff;
-  border-radius: 50%;
+  width: 24px;
+  height: 24px;
   background-color: ${(props) => props.bgColor};
   cursor: pointer;
-`;
-
-const ColorPickerIcon = styled.div`
-  position: absolute;
-  right: 0;
-  bottom: 0;
-  width: 16px;
-  height: 16px;
-  background-color: white;
-  border: 1px solid ${(props) => props.bgColor};
-  border-radius: 50%;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  font-size: 10px;
-  font-weight: bold;
-  color: ${(props) => props.bgColor};
 `;
 
 const Container = styled.div`
@@ -42,18 +23,20 @@ const Container = styled.div`
   justify-content: center;
   align-items: center;
   height: 100vh;
+  gap: 16px;
 `;
 
-const Form = styled.div`
+const Form = styled.form`
   display: flex;
   flex-direction: column;
   width: 40%;
   padding: 20px;
   border: 1px solid #ccc;
   border-radius: 5px;
+  gap: 16px;
 `;
 
-const Input = styled.input`
+const Input = styled.textarea`
   margin-bottom: 10px;
   padding: 10px;
   border: 1px solid #ccc;
@@ -80,8 +63,9 @@ const FramesContainer = styled.div`
   margin-top: 16px;
 `;
 
-const Frame = styled.div`
+const Frame = styled.div<{ bgColor: string }>`
   background-color: ${(props) => props.bgColor};
+  height: 320px;
   border-radius: 8px;
   padding: 16px;
   display: flex;
@@ -119,6 +103,7 @@ const generateSimilarColors = (color: string) => {
 
 export default function Home() {
   const [businessDescription, setBusinessDescription] = useState("");
+
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const [colors, setColors] = useState([
     "#0070f3",
@@ -127,18 +112,18 @@ export default function Home() {
     "#98c0b7",
   ]);
   const [frames, setFrames] = useState<any[]>([]);
-
   const handleGenerate = () => {
     const newFrames = colors.map((color) => ({
       color,
-      title: "Business Name",
-      slogan: "Slogan Here",
-      description: "Lorem ipsum dolor sit amet, consectetur adipiscing elit.",
+      title: "Nome do Negócio",
+      slogan: "Slogan",
+      description:
+        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl sit amet aliquam luctus, nunc nisl aliquam massa, eget aliquam nunc nisl sit amet nunc.",
     }));
     setFrames(newFrames);
   };
 
-  const handleColorChange = (e) => {
+  const handleColorChange = (e: any) => {
     const newColor = e.target.value;
     const updatedColors = generateSimilarColors(newColor);
     setColors(updatedColors);
@@ -147,7 +132,7 @@ export default function Home() {
   return (
     <>
       <Head>
-        <title>Business Generator</title>
+        <title>INOVA</title>
         <meta name="description" content="Generate business frames" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
         <link rel="icon" href="/favicon.ico" />
@@ -160,18 +145,25 @@ export default function Home() {
               Oxygen, Ubuntu, Cantarell, Fira Sans, Droid Sans, Helvetica Neue,
               sans-serif;
             -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-          }
-          code {
-            font-family: source-code-pro, Menlo, Monaco, Consolas, "Courier New",
-              monospace;
           }
         `}
       />
       <Container>
-        <Form>
+        <Form
+          onSubmit={(e) => {
+            e.preventDefault();
+            handleGenerate();
+          }}
+        >
+          <Input
+            required
+            rows={16}
+            placeholder="Descreva seu negócio aqui...*"
+            value={businessDescription}
+            onChange={(e) => setBusinessDescription(e.target.value)}
+          />
           <div>
-            <label htmlFor="color">Select color:</label>
+            <label htmlFor="color">Selecione uma cor:</label>
             <ColorPickerWrapper>
               <ColorPickerInput
                 id="color"
@@ -182,7 +174,7 @@ export default function Home() {
               />
             </ColorPickerWrapper>
           </div>
-          <Button onClick={handleGenerate}>GERAR</Button>
+          <Button type="submit"> GERAR </Button>
         </Form>
 
         <FramesContainer>
@@ -198,7 +190,7 @@ export default function Home() {
                   <h3>{frame.slogan}</h3>
                 </div>
               </FrameTop>
-              <p>{frame.description}</p>
+              <p style={{ marginTop: "16px" }}>{frame.description}</p>
             </Frame>
           ))}
         </FramesContainer>
