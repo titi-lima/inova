@@ -3,6 +3,7 @@ import Head from "next/head";
 import { css, Global } from "@emotion/react";
 import styled from "@emotion/styled";
 import tinycolor from "tinycolor2";
+import axios from "axios";
 
 const ColorPickerWrapper = styled.div`
   position: relative;
@@ -113,6 +114,16 @@ export default function Home() {
   ]);
   const [frames, setFrames] = useState<any[]>([]);
   const handleGenerate = () => {
+    axios
+      .post("/api/ai", {
+        userIdea: businessDescription,
+      })
+      .then((res) => {
+        console.log(res);
+      })
+      .catch((err) => {
+        console.log(err.response);
+      });
     const newFrames = colors.map((color) => ({
       color,
       title: "Nome do Negócio",
