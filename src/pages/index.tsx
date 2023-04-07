@@ -115,7 +115,7 @@ export default function Home() {
   const [frames, setFrames] = useState<any[]>([]);
   const handleGenerate = () => {
     axios
-      .post("/api/ai", {
+      .post("/api/generate", {
         userIdea: businessDescription,
       })
       .then((res) => {
