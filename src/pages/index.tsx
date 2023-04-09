@@ -112,24 +112,31 @@ export default function Home() {
     "#6aa8cb",
     "#98c0b7",
   ]);
-  const [frames, setFrames] = useState<any[]>([]);
-  const handleGenerate = () => {
-    axios
-      .post("/api/generate", {
-        userIdea: businessDescription,
-      })
-      .then((res) => {
-        console.log(res);
-      })
-      .catch((err) => {
-        console.log(err.response);
-      });
-    const newFrames = colors.map((color) => ({
+  const [frames, setFrames] = useState<{
+    color: string;
+    title: string;
+    slogan: string;
+    description: string;
+  }[]>([]);
+  const handleGenerate = async () => {
+    const { data: { result } } = await axios.post<{ result: string }>("/api/generate", {
+      userIdea: businessDescription,
+    });
+
+    const [companyNames, slogans, smallDescriptions] = result
+      .trim()
+      .split("\n\n")
+      .map((item) => item
+        .split("\n")
+        .slice(1)
+        .map((item) => item.slice(3))
+      );
+
+    const newFrames = colors.map((color, index) => ({
       color,
-      title: "Nome do Negócio",
-      slogan: "Slogan",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl sit amet aliquam luctus, nunc nisl aliquam massa, eget aliquam nunc nisl sit amet nunc.",
+      title: companyNames[index],
+      slogan: slogans[index],
+      description: smallDescriptions[index],
     }));
     setFrames(newFrames);
   };
