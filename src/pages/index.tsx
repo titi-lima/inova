@@ -144,6 +144,7 @@ export default function Home() {
     });
 
     const id = response?.data?.id;
+    if (!id) return alert("Failed to generate logo");
     let status = response?.data?.status;
     let prediction: Record<string, any> = {};
     while (status !== "succeeded" && status !== "failed") {

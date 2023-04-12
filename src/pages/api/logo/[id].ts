@@ -11,8 +11,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     );
     return;
   }
-
-  if (!req.query.id) {
+  if (!req.query.id || req.query.id === 'undefined') {
     res.statusCode = 400;
     res.end(JSON.stringify({ detail: "Please enter a valid ID" }));
     return;
