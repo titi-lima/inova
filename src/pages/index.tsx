@@ -102,8 +102,11 @@ const generateSimilarColors = (color: string) => {
   return colors;
 };
 
+const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
+
 export default function Home() {
   const [businessDescription, setBusinessDescription] = useState("");
+  const [logos, setLogos] = useState<string[]>([]);
 
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const [colors, setColors] = useState([
@@ -112,24 +115,65 @@ export default function Home() {
     "#6aa8cb",
     "#98c0b7",
   ]);
-  const [frames, setFrames] = useState<any[]>([]);
-  const handleGenerate = () => {
-    axios
-      .post("/api/generate", {
-        userIdea: businessDescription,
+  const [frames, setFrames] = useState<
+    {
+      color: string;
+      title: string;
+      slogan: string;
+      description: string;
+      image: string;
+    }[]
+  >([]);
+  const handleGenerate = async () => {
+    const response = await axios
+      .post("/api/logo", {
+        prompt: businessDescription,
+        color: colors[selectedColorIndex],
       })
       .then((res) => {
-        console.log(res);
+        console.log(res.data);
+        return res;
       })
       .catch((err) => {
         console.log(err.response);
       });
-    const newFrames = colors.map((color) => ({
+
+    const {
+      data: { result },
+    } = await axios.post<{ result: string }>("/api/generate", {
+      userIdea: businessDescription,
+    });
+
+    const id = response?.data?.id;
+    let status = response?.data?.status;
+    let prediction: Record<string, any> = {};
+    while (status !== "succeeded" && status !== "failed") {
+      await sleep(1000);
+      prediction = await axios.get(`/api/logo/${id}`);
+      status = prediction.data.status;
+      console.log({ prediction });
+    }
+    console.log({ prediction });
+    if (status === "failed") {
+      alert("Failed to generate logo");
+      return;
+    }
+    const [companyNames, slogans, smallDescriptions] = result
+      .trim()
+      .split("\n\n")
+      .map((item) =>
+        item
+          .split("\n")
+          .slice(1)
+          .map((item) => item.slice(3))
+      );
+
+    const newFrames = colors.map((color, index) => ({
       color,
-      title: "Nome do Negócio",
-      slogan: "Slogan",
-      description:
-        "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed euismod, nisl sit amet aliquam luctus, nunc nisl aliquam massa, eget aliquam nunc nisl sit amet nunc.",
+      title: companyNames[index],
+      slogan: slogans[index],
+      description: smallDescriptions[index],
+      image: prediction?.data.output[index],
     }));
     setFrames(newFrames);
   };
@@ -192,10 +236,7 @@ export default function Home() {
           {frames?.map((frame, index) => (
             <Frame key={index} bgColor={frame.color}>
               <FrameTop>
-                <RoundImage
-                  src="https://via.placeholder.com/100"
-                  alt="Placeholder"
-                />
+                <RoundImage src={frame.image} alt="Placeholder" />
                 <div>
                   <h2>{frame.title}</h2>
                   <h3>{frame.slogan}</h3>

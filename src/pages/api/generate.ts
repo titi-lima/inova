@@ -1,13 +1,30 @@
 import { Configuration, OpenAIApi } from "openai";
 import type { NextApiRequest, NextApiResponse } from "next";
 
+const mock = `Company Names:
+1. The Baker's Bench
+2. Rise & Knead
+3. Flour & Fire
+4. Hearth & Home Bakery
+
+Slogans:
+1. "Fresh. Hot. Delicious."
+2. "The taste of home."
+3. "Knead the dough, bake the bread."
+4. "Warm yeasty goodness."
+
+Small Descriptions:
+1. A cozy bakery that specializes in fresh, homemade breads and pastries.
+2. A family-run shop offering delicious breads and pastries for every occasion.
+3. Home of the freshest breads and pastries, made with love and care.
+4. A traditional bakery with a passion for creating the perfect loaf.`;
 
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });
 const openai = new OpenAIApi(configuration);
 
-export default async function (req: NextApiRequest, res: NextApiResponse) {
+export default async function generateIdeas(req: NextApiRequest, res: NextApiResponse) {
   if (!configuration.apiKey) {
     res.status(500).json({
       error: {
@@ -28,10 +45,12 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
   }
 
   try {
+    // res.status(200).json({ result: mock });
     const completion = await openai.createCompletion({
       model: "text-davinci-003",
       prompt: generatePrompt(userIdea),
       temperature: 0.6,
+      max_tokens: 200,
     });
     res.status(200).json({ result: completion.data.choices[0].text });
   } catch(error : any) {
@@ -51,11 +70,11 @@ export default async function (req: NextApiRequest, res: NextApiResponse) {
 }
 
 function generatePrompt(userIdea: string) {
-  return `You're building an app that generates names, slogans, and small descriptions for new companies based on a user-provided idea. Your app needs to generate 4 options for each category. Given the following idea from the user, provide 4 options for each category:
+  return `Você está criando um aplicativo que gera nomes, slogans e pequenas descrições para novas empresas com base em uma ideia fornecida pelo usuário. Seu aplicativo precisa gerar 4 opções para cada categoria. Dada a seguinte ideia do usuário, forneça 4 opções para cada categoria:
 
-User idea: ${userIdea}
+Ideia do usuário: ${userIdea}
 
-Company Names:
+Nomes do negócio:
 1.
 2.
 3.
@@ -67,7 +86,7 @@ Slogans:
 3.
 4.
 
-Small Descriptions:
+Pequena Descrição:
 1.
 2.
 3.
