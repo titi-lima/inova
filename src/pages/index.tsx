@@ -106,7 +106,6 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export default function Home() {
   const [businessDescription, setBusinessDescription] = useState("");
-  const [logos, setLogos] = useState<string[]>([]);
 
   const [selectedColorIndex, setSelectedColorIndex] = useState(0);
   const [colors, setColors] = useState([
