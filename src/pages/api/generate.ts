@@ -50,7 +50,7 @@ export default async function generateIdeas(req: NextApiRequest, res: NextApiRes
       model: "text-davinci-003",
       prompt: generatePrompt(userIdea),
       temperature: 0.6,
-      max_tokens: 200,
+      max_tokens: 800,
     });
     res.status(200).json({ result: completion.data.choices[0].text });
   } catch(error : any) {
@@ -70,7 +70,7 @@ export default async function generateIdeas(req: NextApiRequest, res: NextApiRes
 }
 
 function generatePrompt(userIdea: string) {
-  return `Você está criando um aplicativo que gera nomes, slogans e pequenas descrições para novas empresas com base em uma ideia fornecida pelo usuário. Seu aplicativo precisa gerar 4 opções para cada categoria. Dada a seguinte ideia do usuário, forneça 4 opções para cada categoria:
+  return `Você está criando um aplicativo que gera nomes, slogans e pequenas descrições para novas empresas com base em uma ideia fornecida pelo usuário. Seu aplicativo precisa gerar 4 opções para cada categoria. Dada a seguinte ideia do usuário, forneça 4 opções para cada categoria em português:
 
 Ideia do usuário: ${userIdea}
 
@@ -86,7 +86,7 @@ Slogans:
 3.
 4.
 
-Pequena Descrição:
+Descrição:
 1.
 2.
 3.

@@ -2,22 +2,8 @@ import { useState } from "react";
 import Head from "next/head";
 import { css, Global } from "@emotion/react";
 import styled from "@emotion/styled";
-import tinycolor from "tinycolor2";
 import axios from "axios";
-
-const ColorPickerWrapper = styled.div`
-  position: relative;
-  display: inline-block;
-  margin: 0 16px;
-`;
-
-const ColorPickerInput = styled.input<{ bgColor: string }>`
-  appearance: none;
-  width: 24px;
-  height: 24px;
-  background-color: ${(props) => props.bgColor};
-  cursor: pointer;
-`;
+import { ClimbingBoxLoader } from "react-spinners";
 
 const Container = styled.div`
   display: flex;
@@ -46,7 +32,7 @@ const Input = styled.textarea`
 
 const Button = styled.button`
   padding: 10px;
-  background-color: #0070f3;
+  background-color: #1a1a1a;
   color: white;
   border: none;
   border-radius: 5px;
@@ -82,38 +68,59 @@ const FrameTop = styled.div`
 `;
 
 const RoundImage = styled.img`
-  width: 50px;
-  height: 50px;
+  width: 80px;
+  height: 80px;
   border-radius: 50%;
   object-fit: cover;
 `;
 
-const generateSimilarColors = (color: string) => {
-  const baseColor = tinycolor(color);
-  const colors = [baseColor.toHexString()];
-  for (let i = 0; i < 3; i++) {
-    colors.push(
-      baseColor
-        .clone()
-        .spin(10 * (i + 1))
-        .toHexString()
-    );
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999;
+`;
+
+const ModalContent = styled.div`
+  background-color: #fff;
+  padding: 20px;
+  border-radius: 5px;
+  max-width: 800px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transform: translateY(20%);
+  opacity: 0;
+  transition: all 0.3s ease-out;
+  &.active {
+    transform: translateY(0);
+    opacity: 1;
   }
-  return colors;
-};
+`;
 
 const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 
 export default function Home() {
   const [businessDescription, setBusinessDescription] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
-  const [selectedColorIndex, setSelectedColorIndex] = useState(0);
-  const [colors, setColors] = useState([
-    "#0070f3",
-    "#3c90df",
-    "#6aa8cb",
-    "#98c0b7",
-  ]);
+  const CenteredImage = styled.img`
+    width: 80%;
+    max-width: 200px;
+    height: auto;
+    margin: 0 auto;
+    display: block;
+    object-fit: cover;
+    border-radius: 50%;
+  `;
+
   const [frames, setFrames] = useState<
     {
       color: string;
@@ -123,11 +130,20 @@ export default function Home() {
       image: string;
     }[]
   >([]);
+  const [activeFrameIndex, setActiveFrameIndex] = useState<number | null>(null);
+
+  const openFrame = (index: number) => {
+    setActiveFrameIndex(index);
+  };
+
+  const closeFrame = () => {
+    setActiveFrameIndex(null);
+  };
   const handleGenerate = async () => {
+    setIsLoading(true);
     const response = await axios
       .post("/api/logo", {
         prompt: businessDescription,
-        color: colors[selectedColorIndex],
       })
       .then((res) => {
         console.log(res.data);
@@ -156,10 +172,12 @@ export default function Home() {
     console.log({ prediction });
     if (status === "failed") {
       alert("Failed to generate logo");
+      setIsLoading(false);
       return;
     }
     const [companyNames, slogans, smallDescriptions] = result
       .trim()
+      .replace(/"/g, "")
       .split("\n\n")
       .map((item) =>
         item
@@ -168,22 +186,17 @@ export default function Home() {
           .map((item) => item.slice(3))
       );
 
-    const newFrames = colors.map((color, index) => ({
-      color,
-      title: companyNames[index],
-      slogan: slogans[index],
-      description: smallDescriptions[index],
-      image: prediction?.data.output[index],
-    }));
+    const newFrames = prediction?.data?.output?.map(
+      (logo: string, index: number) => ({
+        title: companyNames[index],
+        slogan: slogans[index],
+        description: smallDescriptions[index],
+        image: logo,
+      })
+    );
+    setIsLoading(false);
     setFrames(newFrames);
   };
-
-  const handleColorChange = (e: any) => {
-    const newColor = e.target.value;
-    const updatedColors = generateSimilarColors(newColor);
-    setColors(updatedColors);
-  };
-
   return (
     <>
       <Head>
@@ -217,34 +230,74 @@ export default function Home() {
             value={businessDescription}
             onChange={(e) => setBusinessDescription(e.target.value)}
           />
-          <div>
-            <label htmlFor="color">Selecione uma cor:</label>
-            <ColorPickerWrapper>
-              <ColorPickerInput
-                id="color"
-                type="color"
-                onChange={handleColorChange}
-                value={colors[selectedColorIndex]}
-                bgColor={colors[selectedColorIndex]}
-              />
-            </ColorPickerWrapper>
-          </div>
           <Button type="submit"> GERAR </Button>
         </Form>
 
         <FramesContainer>
-          {frames?.map((frame, index) => (
-            <Frame key={index} bgColor={frame.color}>
-              <FrameTop>
-                <RoundImage src={frame.image} alt="Placeholder" />
-                <div>
-                  <h2>{frame.title}</h2>
-                  <h3>{frame.slogan}</h3>
-                </div>
-              </FrameTop>
-              <p style={{ marginTop: "16px" }}>{frame.description}</p>
-            </Frame>
-          ))}
+          {isLoading ? (
+            <div
+              style={{
+                width: "100%",
+                display: "flex",
+                justifyContent: "center",
+              }}
+            >
+              <ClimbingBoxLoader size={20} />
+            </div>
+          ) : (
+            <>
+              {activeFrameIndex !== null && (
+                <ModalOverlay onClick={closeFrame}>
+                  <ModalContent
+                    className="active"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    {frames?.length ? (
+                      <Frame bgColor={"#fff9de"}>
+                        <FrameTop>
+                          <RoundImage
+                            src={frames[activeFrameIndex].image}
+                            alt="Placeholder"
+                          />
+                          <div>
+                            <h1>{frames[activeFrameIndex].title}</h1>
+                            <h2 style={{ marginTop: "8px" }}>
+                              {frames[activeFrameIndex].slogan}
+                            </h2>
+                          </div>
+                        </FrameTop>
+                        <p style={{ marginTop: "16px" }}>
+                          {frames[activeFrameIndex].description}
+                        </p>
+                      </Frame>
+                    ) : (
+                      <div
+                        style={{
+                          width: "100%",
+                          display: "flex",
+                          justifyContent: "center",
+                        }}
+                      >
+                        <ClimbingBoxLoader size={20} />
+                      </div>
+                    )}
+                  </ModalContent>
+                </ModalOverlay>
+              )}
+              {!isLoading &&
+                frames.map((frame, index) => (
+                  <Frame
+                    key={index}
+                    bgColor={"#fff9de"}
+                    style={{ cursor: "pointer" }}
+                    onClick={() => openFrame(index)}
+                  >
+                    <h1 style={{ textAlign: "center" }}>{frame.title}</h1>
+                    <CenteredImage src={frame.image} alt="Placeholder" />
+                  </Frame>
+                ))}
+            </>
+          )}
         </FramesContainer>
       </Container>
     </>

@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   }
 
-  const prompt = `Generate a logo for a business with the following idea: ${req.body.prompt}. ${req.body.color && `The color should be close to: ${req.body.color}.`} Be creative and design a logo that reflects the essence of the company. The output should be solely a logo.`;
+  const prompt = `Generate a logo for a business with the following idea in Portuguese: ${req.body.prompt}. Be creative and design a logo that reflects the essence of the company. The output should be solely a logo.`;
 
   const response = await axios.post("https://api.replicate.com/v1/predictions", {
     version: "9936c2001faa2194a261c01381f90e65261879985476014a0a37a334593a05eb",
