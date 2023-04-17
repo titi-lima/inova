@@ -17,8 +17,10 @@ const Container = styled.div`
   display: flex;
   justify-content: center;
   align-items: center;
-  height: 100vh;
+  min-height: 100vh;
   gap: 16px;
+  padding-top: 16px;
+  padding-bottom: 16px;
   background-color: #1a1a1a;
   @media (max-width: 1000px) {
     display: flex;
