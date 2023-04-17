@@ -56,7 +56,7 @@ function generatePrompt(userIdea: string) {
 
 Ideia do usuário: ${userIdea}
 
-Nomes do negócio:
+Nomes do negócio, até duas palavras:
 1.
 2.
 3.
