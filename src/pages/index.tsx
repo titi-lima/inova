@@ -123,7 +123,6 @@ export default function Home() {
 
   const [frames, setFrames] = useState<
     {
-      color: string;
       title: string;
       slogan: string;
       description: string;
@@ -229,6 +228,7 @@ export default function Home() {
             placeholder="Descreva seu negócio aqui...*"
             value={businessDescription}
             onChange={(e) => setBusinessDescription(e.target.value)}
+            maxLength={70}
           />
           <Button type="submit"> GERAR </Button>
         </Form>
