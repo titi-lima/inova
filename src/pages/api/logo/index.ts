@@ -19,7 +19,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     return;
   }
 
-  const prompt = `mdjrny-v4 style a logo for a business with the following idea in Portuguese: ${req.body.prompt}. simple, vector, The output should be solely a logo. --no text`;
+  const prompt = `mdjrny-v4 style a logo for a business with the following idea in Portuguese: ${req.body.prompt}. ${req.body.select}, simple, vector, The output should be solely a logo without letters. --no text, --no realistic, --no words`;
 
   const response = await axios.post("https://api.replicate.com/v1/predictions", {
     version: "9936c2001faa2194a261c01381f90e65261879985476014a0a37a334593a05eb",

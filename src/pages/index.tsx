@@ -4,6 +4,8 @@ import { css, Global } from "@emotion/react";
 import styled from "@emotion/styled";
 import axios from "axios";
 import { ClimbingBoxLoader } from "react-spinners";
+import { Select, Button, MenuItem, InputLabel, FormControl } from "@mui/material";
+import SendIcon from '@mui/icons-material/Send';
 
 const Container = styled.div`
   display: flex;
@@ -11,6 +13,7 @@ const Container = styled.div`
   align-items: center;
   height: 100vh;
   gap: 16px;
+  background-color: black;
 `;
 
 const Form = styled.form`
@@ -21,6 +24,7 @@ const Form = styled.form`
   border: 1px solid #ccc;
   border-radius: 5px;
   gap: 16px;
+  background-color: #404040;
 `;
 
 const Input = styled.textarea`
@@ -28,18 +32,6 @@ const Input = styled.textarea`
   padding: 10px;
   border: 1px solid #ccc;
   border-radius: 5px;
-`;
-
-const Button = styled.button`
-  padding: 10px;
-  background-color: #1a1a1a;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  &:hover {
-    background-color: #0051bb;
-  }
 `;
 
 const FramesContainer = styled.div`
@@ -89,8 +81,8 @@ const ModalOverlay = styled.div`
 
 const ModalContent = styled.div`
   background-color: #fff;
-  padding: 20px;
-  border-radius: 5px;
+  padding: 15px;
+  border-radius: 10px;
   max-width: 800px;
   width: 100%;
   max-height: 90vh;
@@ -110,6 +102,8 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export default function Home() {
   const [businessDescription, setBusinessDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const [selectedOption, setSelectedOption] = useState("");
 
   const CenteredImage = styled.img`
     width: 80%;
@@ -143,6 +137,7 @@ export default function Home() {
     const response = await axios
       .post("/api/logo", {
         prompt: businessDescription,
+        select: selectedOption,
       })
       .then((res) => {
         console.log(res.data);
@@ -198,12 +193,6 @@ export default function Home() {
   };
   return (
     <>
-      <Head>
-        <title>INOVA</title>
-        <meta name="description" content="Generate business frames" />
-        <meta name="viewport" content="width=device-width, initial-scale=1" />
-        <link rel="icon" href="/favicon.ico" />
-      </Head>
       <Global
         styles={css`
           body {
@@ -222,6 +211,17 @@ export default function Home() {
             handleGenerate();
           }}
         >
+
+          
+          
+          <h1 style={{width:'100%', textAlign:'center', color:'white'}}>
+            <RoundImage
+              src="../../assets/logo.png"
+              style={{width:'10%', maxWidth:'90px', height:'auto', margin:'0 auto', display:'block'}}
+              alt="Placeholder"
+            /> INOVA
+          </h1>
+
           <Input
             required
             rows={16}
@@ -229,8 +229,27 @@ export default function Home() {
             value={businessDescription}
             onChange={(e) => setBusinessDescription(e.target.value)}
             maxLength={70}
+            style={{color:'white'}}
           />
-          <Button type="submit"> GERAR </Button>
+
+          <FormControl required fullWidth> 
+            <InputLabel id="helper-label">Estilo</InputLabel>  
+            <Select
+              labelId="helper-label"
+              required
+              value={selectedOption}
+              onChange={(e) => setSelectedOption(e.target.value)}
+              label="Estilo"
+              style={{color:'white' }}
+            >
+              <MenuItem value="">Selecione um estilo</MenuItem>
+              <MenuItem value="Modern">Moderno</MenuItem>
+              <MenuItem value="Classic">Clássico</MenuItem>
+              <MenuItem value="Vintage">Vintage</MenuItem>
+            </Select>
+          </FormControl>
+            
+          <Button type="submit" variant="contained" startIcon={<SendIcon />}> GERAR </Button>
         </Form>
 
         <FramesContainer>
@@ -239,10 +258,10 @@ export default function Home() {
               style={{
                 width: "100%",
                 display: "flex",
-                justifyContent: "center",
+                justifyContent: "right",
               }}
             >
-              <ClimbingBoxLoader size={20} />
+              <ClimbingBoxLoader color="white" size={20}  />
             </div>
           ) : (
             <>
@@ -253,7 +272,7 @@ export default function Home() {
                     onClick={(e) => e.stopPropagation()}
                   >
                     {frames?.length ? (
-                      <Frame bgColor={"#fff9de"}>
+                      <Frame bgColor={"#404040"}>
                         <FrameTop>
                           <RoundImage
                             src={frames[activeFrameIndex].image}
@@ -275,10 +294,10 @@ export default function Home() {
                         style={{
                           width: "100%",
                           display: "flex",
-                          justifyContent: "center",
+                          justifyContent: "right",
                         }}
                       >
-                        <ClimbingBoxLoader size={20} />
+                        <ClimbingBoxLoader color="white" size={20} />
                       </div>
                     )}
                   </ModalContent>
@@ -288,7 +307,7 @@ export default function Home() {
                 frames.map((frame, index) => (
                   <Frame
                     key={index}
-                    bgColor={"#fff9de"}
+                    bgColor={"#404040"}
                     style={{ cursor: "pointer" }}
                     onClick={() => openFrame(index)}
                   >
