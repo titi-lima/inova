@@ -1,24 +1,6 @@
 import { Configuration, OpenAIApi } from "openai";
 import type { NextApiRequest, NextApiResponse } from "next";
 
-const mock = `Company Names:
-1. The Baker's Bench
-2. Rise & Knead
-3. Flour & Fire
-4. Hearth & Home Bakery
-
-Slogans:
-1. "Fresh. Hot. Delicious."
-2. "The taste of home."
-3. "Knead the dough, bake the bread."
-4. "Warm yeasty goodness."
-
-Small Descriptions:
-1. A cozy bakery that specializes in fresh, homemade breads and pastries.
-2. A family-run shop offering delicious breads and pastries for every occasion.
-3. Home of the freshest breads and pastries, made with love and care.
-4. A traditional bakery with a passion for creating the perfect loaf.`;
-
 const configuration = new Configuration({
   apiKey: process.env.OPENAI_API_KEY,
 });

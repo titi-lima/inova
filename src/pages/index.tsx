@@ -4,6 +4,14 @@ import { css, Global } from "@emotion/react";
 import styled from "@emotion/styled";
 import axios from "axios";
 import { ClimbingBoxLoader } from "react-spinners";
+import {
+  Select,
+  Button,
+  MenuItem,
+  InputLabel,
+  FormControl,
+} from "@mui/material";
+import SendIcon from "@mui/icons-material/Send";
 
 const Container = styled.div`
   display: flex;
@@ -11,6 +19,11 @@ const Container = styled.div`
   align-items: center;
   height: 100vh;
   gap: 16px;
+  background-color: #1a1a1a;
+  @media (max-width: 1000px) {
+    display: flex;
+    flex-direction: column;
+  }
 `;
 
 const Form = styled.form`
@@ -21,6 +34,10 @@ const Form = styled.form`
   border: 1px solid #ccc;
   border-radius: 5px;
   gap: 16px;
+  background-color: #404040;
+  @media (max-width: 1000px) {
+    width: 80%;
+  }
 `;
 
 const Input = styled.textarea`
@@ -30,28 +47,23 @@ const Input = styled.textarea`
   border-radius: 5px;
 `;
 
-const Button = styled.button`
-  padding: 10px;
-  background-color: #1a1a1a;
-  color: white;
-  border: none;
-  border-radius: 5px;
-  cursor: pointer;
-  &:hover {
-    background-color: #0051bb;
-  }
-`;
-
 const FramesContainer = styled.div`
-  display: grid;
-  grid-template-columns: repeat(2, 1fr);
-  grid-gap: 16px;
+  display: flex;
+  flex-direction: column;
+  flex-wrap: wrap;
   width: 100%;
   margin-top: 16px;
+  gap: 16px;
+
+  @media (min-width: 800px) {
+    flex-direction: row;
+  }
 `;
 
 const Frame = styled.div<{ bgColor: string }>`
   background-color: ${(props) => props.bgColor};
+  flex: 1;
+  min-width: calc(50% - 16px);
   height: 320px;
   border-radius: 8px;
   padding: 16px;
@@ -59,6 +71,16 @@ const Frame = styled.div<{ bgColor: string }>`
   flex-direction: column;
   gap: 16px;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
+  transition: all 0.2s ease-in-out;
+  :hover {
+    cursor: pointer;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transform: scale(1.03);
+  }
+
+  @media (max-width: 600px) {
+    min-width: 100%;
+  }
 `;
 
 const FrameTop = styled.div`
@@ -80,7 +102,7 @@ const ModalOverlay = styled.div`
   left: 0;
   right: 0;
   bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
+  background-color: rgba(0, 0, 0, 0.8);
   display: flex;
   justify-content: center;
   align-items: center;
@@ -89,16 +111,15 @@ const ModalOverlay = styled.div`
 
 const ModalContent = styled.div`
   background-color: #fff;
-  padding: 20px;
-  border-radius: 5px;
+  border-radius: 10px;
   max-width: 800px;
   width: 100%;
-  max-height: 90vh;
   overflow-y: auto;
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1);
   transform: translateY(20%);
   opacity: 0;
   transition: all 0.3s ease-out;
+  border: 1.6px solid #ccc;
   &.active {
     transform: translateY(0);
     opacity: 1;
@@ -110,6 +131,8 @@ const sleep = (ms: number) => new Promise((r) => setTimeout(r, ms));
 export default function Home() {
   const [businessDescription, setBusinessDescription] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+
+  const [selectedOption, setSelectedOption] = useState("");
 
   const CenteredImage = styled.img`
     width: 80%;
@@ -143,6 +166,7 @@ export default function Home() {
     const response = await axios
       .post("/api/logo", {
         prompt: businessDescription,
+        select: selectedOption,
       })
       .then((res) => {
         console.log(res.data);
@@ -217,11 +241,27 @@ export default function Home() {
       />
       <Container>
         <Form
+          style={{ marginLeft: "16px" }}
           onSubmit={(e) => {
             e.preventDefault();
             handleGenerate();
           }}
         >
+          <h1 style={{ width: "100%", textAlign: "center", color: "white" }}>
+            <RoundImage
+              src="../../assets/logo.png"
+              style={{
+                width: "10%",
+                maxWidth: "90px",
+                height: "auto",
+                margin: "0 auto",
+                display: "block",
+              }}
+              alt="Placeholder"
+            />{" "}
+            INOVA
+          </h1>
+
           <Input
             required
             rows={16}
@@ -229,8 +269,30 @@ export default function Home() {
             value={businessDescription}
             onChange={(e) => setBusinessDescription(e.target.value)}
             maxLength={70}
+            style={{ color: "black" }}
           />
-          <Button type="submit"> GERAR </Button>
+
+          <FormControl required fullWidth>
+            <InputLabel id="helper-label">Estilo</InputLabel>
+            <Select
+              labelId="helper-label"
+              required
+              value={selectedOption}
+              onChange={(e) => setSelectedOption(e.target.value)}
+              label="Estilo"
+              style={{ backgroundColor: "white" }}
+            >
+              <MenuItem value="">Selecione um estilo</MenuItem>
+              <MenuItem value="Modern">Moderno</MenuItem>
+              <MenuItem value="Classic">Clássico</MenuItem>
+              <MenuItem value="Vintage">Vintage</MenuItem>
+            </Select>
+          </FormControl>
+
+          <Button type="submit" variant="contained" startIcon={<SendIcon />}>
+            {" "}
+            GERAR{" "}
+          </Button>
         </Form>
 
         <FramesContainer>
@@ -239,10 +301,10 @@ export default function Home() {
               style={{
                 width: "100%",
                 display: "flex",
-                justifyContent: "center",
+                justifyContent: "right",
               }}
             >
-              <ClimbingBoxLoader size={20} />
+              <ClimbingBoxLoader color="white" size={20} />
             </div>
           ) : (
             <>
@@ -253,20 +315,23 @@ export default function Home() {
                     onClick={(e) => e.stopPropagation()}
                   >
                     {frames?.length ? (
-                      <Frame bgColor={"#fff9de"}>
+                      <Frame
+                        bgColor={"#404040"}
+                        style={{ transform: "scale(1.00)", cursor: "default" }}
+                      >
                         <FrameTop>
                           <RoundImage
                             src={frames[activeFrameIndex].image}
                             alt="Placeholder"
                           />
-                          <div>
+                          <div style={{ color: "#fff" }}>
                             <h1>{frames[activeFrameIndex].title}</h1>
                             <h2 style={{ marginTop: "8px" }}>
                               {frames[activeFrameIndex].slogan}
                             </h2>
                           </div>
                         </FrameTop>
-                        <p style={{ marginTop: "16px" }}>
+                        <p style={{ marginTop: "16px", color: "#ffffffc8" }}>
                           {frames[activeFrameIndex].description}
                         </p>
                       </Frame>
@@ -275,10 +340,10 @@ export default function Home() {
                         style={{
                           width: "100%",
                           display: "flex",
-                          justifyContent: "center",
+                          justifyContent: "right",
                         }}
                       >
-                        <ClimbingBoxLoader size={20} />
+                        <ClimbingBoxLoader color="white" size={20} />
                       </div>
                     )}
                   </ModalContent>
@@ -288,11 +353,19 @@ export default function Home() {
                 frames.map((frame, index) => (
                   <Frame
                     key={index}
-                    bgColor={"#fff9de"}
+                    bgColor={"#404040"}
                     style={{ cursor: "pointer" }}
                     onClick={() => openFrame(index)}
                   >
-                    <h1 style={{ textAlign: "center" }}>{frame.title}</h1>
+                    <h1
+                      style={{
+                        textAlign: "center",
+                        color: "#fff",
+                        WebkitTextStroke: "1px #000",
+                      }}
+                    >
+                      {frame.title}
+                    </h1>
                     <CenteredImage src={frame.image} alt="Placeholder" />
                   </Frame>
                 ))}
